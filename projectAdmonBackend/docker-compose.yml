@@ -1,0 +1,14 @@
+# Docker compose for deploying spring boot application into tomcat container
+
+version: '3.7'
+
+services:
+  admon-backend:
+    container_name: admon-backend
+    image: admon-backend
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    restart: always
