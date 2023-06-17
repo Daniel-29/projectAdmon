@@ -6,19 +6,19 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import uca.edu.projectadmonbackend.models.BodyLoadFile;
 import uca.edu.projectadmonbackend.models.ClientList;
 import uca.edu.projectadmonbackend.models.FileResponse;
 import uca.edu.projectadmonbackend.models.ResponseDto;
 import uca.edu.projectadmonbackend.services.CreateFile;
 
+
 @RestController
+@CrossOrigin(origins = "*", allowedHeaders = "*", methods = { RequestMethod.GET, RequestMethod.POST })
 public class LoadDoc {
     Logger LOGGER = LoggerFactory.getLogger(LoadDoc.class);
+
     @RequestMapping(value = "/loadDoc", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE , produces = MediaType.APPLICATION_JSON_VALUE)
     @Validated
     public ResponseEntity<?> loadDoc(@RequestBody @Validated BodyLoadFile bodyLoadDoc){

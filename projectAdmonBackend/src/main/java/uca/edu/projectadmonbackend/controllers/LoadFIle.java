@@ -16,6 +16,7 @@ import java.util.List;
 
 
 @RestController
+@CrossOrigin(origins = "*", allowedHeaders = "*", methods = { RequestMethod.GET, RequestMethod.POST })
 public class LoadFIle {
 
     Logger LOGGER = LoggerFactory.getLogger(LoadFIle.class);
