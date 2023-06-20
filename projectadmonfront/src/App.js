@@ -30,47 +30,72 @@ function App() {
   };
 
   const loadfile = () => {
-    var file = document.getElementById("file").files[0];
-    var reader = new FileReader();
-    reader.readAsText(file, "UTF-8");
-    reader.onload = function (evt) {
-      var fileString = evt.target.result;
-      var fileArray = fileString.split("\n");
-      var pipe = document.getElementById("pipe").value;
-      var privateKey = document.getElementById("privateKey").value;
-      var typeDoc = document.getElementById("typeDoc").value;
-      var formattedFileArray = fileArray
-        .map((line) => line.trim()) // Trim each line
-        .filter((line) => line !== ""); // Exclude empty lines
-      console.log(formattedFileArray);
-      var body = {
-        pipe: pipe,
-        privateKey: privateKey,
-        typeDoc: typeDoc,
-        file: formattedFileArray,
-      };
+  var file = document.getElementById("file").files[0];
+  var reader = new FileReader();
+  reader.readAsText(file, "UTF-8");
+  reader.onload = function (evt) {
+    var fileString = evt.target.result;
+    var fileArray = fileString.split("\n");
+    var pipe = document.getElementById("pipe").value;
+    var privateKey = document.getElementById("privateKey").value;
+    var typeDoc = document.getElementById("typeDoc").value;
+    var formattedFileArray = fileArray
+      .map((line) => line.trim()) // Trim each line
+      .filter((line) => line !== ""); // Exclude empty lines
+    console.log(formattedFileArray);
+    var body = {
+      pipe: pipe,
+      privateKey: privateKey,
+      typeDoc: typeDoc,
+      file: formattedFileArray,
+    };
 
-      fetch(apiRoute + "loadfile", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(body),
+    fetch(apiRoute + "loadfile", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        document.getElementById("response").innerHTML = JSON.stringify(
+          data.data
+        );
+
+        // Download the response as a file
+        const responseFileName = "response";
+        const responseContent = JSON.stringify(data.data);
+        downloadFile(responseFileName, responseContent, typeDoc);
       })
-        .then((response) => response.json())
-        .then((data) => {
-          document.getElementById("response").innerHTML = JSON.stringify(
-            data.data
-          );
-        })
-        .catch((error) => {
-          console.error("Error:", error);
-        });
-    };
-    reader.onerror = function (evt) {
-      document.getElementById("response").innerHTML = "Error reading file";
-    };
+      .catch((error) => {
+        console.error("Error:", error);
+      });
   };
+  reader.onerror = function (evt) {
+    document.getElementById("response").innerHTML = "Error reading file";
+  };
+};
+
+const downloadFile = (fileName, content, fileType) => {
+  const element = document.createElement("a");
+  const fileExtension = fileType === "JSON" ? ".json" : ".xml";
+  const mimeType = fileType === "JSON" ? "application/json" : "application/xml";
+
+  element.setAttribute(
+    "href",
+    "data:" + mimeType + ";charset=utf-8," + encodeURIComponent(content)
+  );
+  element.setAttribute("download", fileName + fileExtension);
+
+  element.style.display = "none";
+  document.body.appendChild(element);
+
+  element.click();
+
+  document.body.removeChild(element);
+};
+
 
   const formatXMLString = (xmlString) => {
     // Remove line breaks, spaces, and \r\n from the XML string
