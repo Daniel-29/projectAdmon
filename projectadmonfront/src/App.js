@@ -155,6 +155,13 @@ const downloadFile = (fileName, content, fileType) => {
           document.getElementById("responseDoc").innerHTML = JSON.stringify(
             data.data.file
           );
+
+          // Download the response as a file
+          const responseFileName = "response";
+          const responseContent = JSON.stringify(data.data.file);
+          downloadFileDoc(responseFileName, responseContent, typeDoc);
+
+          
         })
         .catch((error) => {
           console.error("Error:", error);
@@ -167,6 +174,28 @@ const downloadFile = (fileName, content, fileType) => {
 
     reader.readAsText(file, "UTF-8");
   };
+
+  const downloadFileDoc = (fileName, content, fileType) => {
+    const element = document.createElement("a");
+    // download all types of files to .txt
+    const fileExtension = ".txt";
+    const mimeType = "text/plain";
+
+    element.setAttribute(
+      "href",
+      "data:" + mimeType + ";charset=utf-8," + encodeURIComponent(content)
+    );
+
+    element.setAttribute("download", fileName + fileExtension);
+
+    element.style.display = "none";
+    document.body.appendChild(element);
+
+    element.click();
+
+    document.body.removeChild(element);
+  };
+
 
   return (
     <div className="App">
