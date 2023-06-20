@@ -1,0 +1,12 @@
+version: '3.7'
+
+services:
+  admon-frontend:
+    container_name: admon-frontend
+    image: admon-frontend
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    restart: always
