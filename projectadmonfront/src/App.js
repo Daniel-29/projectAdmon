@@ -1,6 +1,7 @@
 import "./App.css";
 // import XMLParser from 'react-xml-parser';
 import { ArrowUpTrayIcon } from "@heroicons/react/24/solid";
+import Swal from "sweetalert2";
 
 function App() {
   const apiRoute = "http://localhost:8080/projectAdmon/";
@@ -30,52 +31,97 @@ function App() {
   };
 
   const loadfile = () => {
-  var file = document.getElementById("file").files[0];
-  var reader = new FileReader();
-  reader.readAsText(file, "UTF-8");
-  reader.onload = function (evt) {
-    var fileString = evt.target.result;
-    var fileArray = fileString.split("\n");
-    var pipe = document.getElementById("pipe").value;
-    var privateKey = document.getElementById("privateKey").value;
-    var typeDoc = document.getElementById("typeDoc").value;
-    var formattedFileArray = fileArray
-      .map((line) => line.trim()) // Trim each line
-      .filter((line) => line !== ""); // Exclude empty lines
-    console.log(formattedFileArray);
-    var body = {
-      pipe: pipe,
-      privateKey: privateKey,
-      typeDoc: typeDoc,
-      file: formattedFileArray,
-    };
-
-    fetch(apiRoute + "loadfile", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        document.getElementById("response").innerHTML = JSON.stringify(
-          data.data
-        );
-
-        // Download the response as a file
-        const responseFileName = "response";
-        const responseContent = JSON.stringify(data.data);
-        downloadFile(responseFileName, responseContent, typeDoc);
-      })
-      .catch((error) => {
-        console.error("Error:", error);
+    var file = document.getElementById("file").files[0];
+    var reader = new FileReader();
+  
+    if (!file) {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "No file selected",
       });
+
+      return;
+      
+    }
+  
+    reader.readAsText(file, "UTF-8");
+  
+    reader.onload = function (evt) {
+      var fileString = evt.target.result;
+      var fileArray = fileString.split("\n");
+      var pipe = document.getElementById("pipe").value;
+      var privateKey = document.getElementById("privateKey").value;
+      var typeDoc = document.getElementById("typeDoc").value;
+  
+      if (!pipe) {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Pipe is required",
+        });
+
+        return;
+      }
+  
+      if (!privateKey) {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Private key is required",
+        });
+        return;
+      }
+  
+      if (!typeDoc) {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Document type is required",
+        });
+        return;
+      }
+  
+      var formattedFileArray = fileArray
+        .map((line) => line.trim()) // Trim each line
+        .filter((line) => line !== ""); // Exclude empty lines
+      console.log(formattedFileArray);
+  
+      var body = {
+        pipe: pipe,
+        privateKey: privateKey,
+        typeDoc: typeDoc,
+        file: formattedFileArray,
+      };
+  
+      fetch(apiRoute + "loadfile", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          document.getElementById("response").innerHTML = JSON.stringify(
+            data.data
+          );
+  
+          // Download the response as a file
+          const responseFileName = "response";
+          const responseContent = JSON.stringify(data.data);
+          downloadFile(responseFileName, responseContent, typeDoc);
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+        });
+    };
+  
+    reader.onerror = function (evt) {
+      document.getElementById("response").innerHTML = "Error reading file";
+    };
   };
-  reader.onerror = function (evt) {
-    document.getElementById("response").innerHTML = "Error reading file";
-  };
-};
+  
 
 const downloadFile = (fileName, content, fileType) => {
   const element = document.createElement("a");
@@ -106,22 +152,68 @@ const downloadFile = (fileName, content, fileType) => {
     const fileInput = document.getElementById("docFile");
     const file = fileInput.files[0];
     const reader = new FileReader();
-
-    if (!(file instanceof Blob)) {
-      console.error("Invalid file type");
+  
+    if (!file) {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "No file selected",
+      });
       return;
     }
-
+  
+    if (!(file instanceof Blob)) {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Invalid file",
+      });
+      return;
+    }
+  
     reader.onload = function (event) {
       const fileContent = event.target.result;
-
+  
       const pipe = document.getElementById("docPipe").value;
       const privateKey = document.getElementById("docPrivateKey").value;
       const typeDoc = document.getElementById("docTypeDoc").value;
-
+  
+      if (!pipe) {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Pipe is required",
+        });
+        return;
+      }
+  
+      if (!privateKey) {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Private key is required",
+        });
+        return;
+      }
+  
+      if (typeDoc !== "JSON" && typeDoc !== "XML") {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Invalid document type",
+        });
+        return;
+      }
+  
       let body;
       if (typeDoc === "JSON") {
-        const jsonData = JSON.parse(fileContent);
+        let jsonData;
+        try {
+          jsonData = JSON.parse(fileContent);
+        } catch (error) {
+          console.error("Error parsing JSON file:", error);
+          return;
+        }
         body = {
           pipe: pipe,
           privateKey: privateKey,
@@ -138,11 +230,8 @@ const downloadFile = (fileName, content, fileType) => {
           xmlFile: xmlString,
           jsonFile: null,
         };
-      } else {
-        console.error("Invalid document type");
-        return;
       }
-
+  
       fetch(apiRoute + "loadDoc", {
         method: "POST",
         headers: {
@@ -155,25 +244,24 @@ const downloadFile = (fileName, content, fileType) => {
           document.getElementById("responseDoc").innerHTML = JSON.stringify(
             data.data.file
           );
-
+  
           // Download the response as a file
           const responseFileName = "response";
           const responseContent = JSON.stringify(data.data.file);
           downloadFileDoc(responseFileName, responseContent, typeDoc);
-
-          
         })
         .catch((error) => {
           console.error("Error:", error);
         });
     };
-
+  
     reader.onerror = function (event) {
       console.error("Error reading file:", event.target.error);
     };
-
+  
     reader.readAsText(file, "UTF-8");
   };
+  
 
   const downloadFileDoc = (fileName, content, fileType) => {
     const element = document.createElement("a");
@@ -200,6 +288,7 @@ const downloadFile = (fileName, content, fileType) => {
   return (
     <div className="App">
       <header className="App-header">
+        
         <div className="isolate bg-white px-6 py-24 sm:py-32 lg:px-8">
           <div
             className="absolute inset-x-0 top-[-10rem] -z-10 transform-gpu overflow-hidden blur-3xl sm:top-[-20rem]"
