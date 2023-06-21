@@ -239,9 +239,13 @@ function App() {
       })
         .then((response) => response.json())
         .then((data) => {
-          document.getElementById("responseDoc").innerHTML = JSON.stringify(
-            data.data.file
-          );
+
+          let file = "";
+          data.data.file.forEach((element) => {
+          file += element.substring(0, element.length - 1) + "\n";
+          });
+
+          document.getElementById("responseDoc").innerHTML = file;
 
           // Download the response as a file
           const responseFileName = "response";
