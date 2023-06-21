@@ -36,8 +36,8 @@ public class CreateFile {
             line += bodyLoadFile.getPipe();
             line += clientData.getTelefono();
             line += bodyLoadFile.getPipe();
-            line += "(("+clientData.getPoligono().getCoordenadas().toString()+"))";
-            //line += "\n";
+            String poligono = clientData.getPoligono().getCoordenadas().toString().replaceAll("[\\[\\]]", "");
+            line += "(("+poligono+"))";
             file.add(line);
         }
         fileResponse.setMessage("Archivo creado correctamente");
