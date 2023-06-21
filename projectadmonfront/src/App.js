@@ -4,7 +4,7 @@ import { ArrowUpTrayIcon } from "@heroicons/react/24/solid";
 import Swal from "sweetalert2";
 
 function App() {
-  const apiRoute = "http://localhost:8080/";
+  const apiRoute = "http://localhost:8080/projectAdmon/";
   const fileChange = (event) => {
     const file = event.target.files[0];
     const reader = new FileReader();
